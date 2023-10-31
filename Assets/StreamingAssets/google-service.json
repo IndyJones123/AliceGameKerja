@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "474368633513",
+    "firebase_url": "https://unity-e3e5d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "unity-e3e5d",
+    "storage_bucket": "unity-e3e5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474368633513:android:80f72ba8072319ed7257b8",
+        "android_client_info": {
+          "package_name": "com.project.alfian"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "474368633513-jos8s2s6vcit1efhv5korf4385fimm9i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4AhbA6C0J5g4ujNL_Or7wL7aDqjkK46A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "474368633513-jos8s2s6vcit1efhv5korf4385fimm9i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

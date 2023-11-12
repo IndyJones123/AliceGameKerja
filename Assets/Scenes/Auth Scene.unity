@@ -1055,14 +1055,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data:
     username: 
-    Quest1: 0
-    Quest2: 0
-    Quest3: 0
-    Quest4: 0
-    Quest5: 0
   EnteredUsername: {fileID: 1415330615}
   EnteredPassword: {fileID: 1871475518}
   StatusText: {fileID: 979705844}
+  namagame: Kerja
   sceneName: RealWorld
   Logedin: 0
   test:
@@ -1107,7 +1103,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1146483846
 MonoBehaviour:
@@ -1642,55 +1638,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1626110300}
   m_CullTransparentMesh: 1
---- !u!1 &1722957429
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1722957431}
-  - component: {fileID: 1722957430}
-  m_Layer: 0
-  m_Name: AuthUIManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1722957430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1722957429}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11dbba5bedf74c14684f448241025890, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  checkingForAccountUI: {fileID: 0}
-  loginUI: {fileID: 3248631697664642305}
-  registerUI: {fileID: 0}
-  verifyEmailUI: {fileID: 0}
-  verifyEmailText: {fileID: 0}
---- !u!4 &1722957431
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1722957429}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 550.5, y: 270, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1803179169
 GameObject:
   m_ObjectHideFlags: 0
@@ -2180,53 +2127,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1955879497}
   m_CullTransparentMesh: 0
---- !u!1 &1967526034
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1967526036}
-  - component: {fileID: 1967526035}
-  m_Layer: 0
-  m_Name: AuthFireBaseManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1967526035
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967526034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79ae9cad2ce201f4e8c6181e572be810, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  usernameInput: {fileID: 0}
-  emailInput: {fileID: 0}
-  passwordInput: {fileID: 0}
---- !u!4 &1967526036
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1967526034}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 550.5, y: 270, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2007658052
 GameObject:
   m_ObjectHideFlags: 0

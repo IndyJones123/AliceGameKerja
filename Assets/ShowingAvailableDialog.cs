@@ -12,10 +12,11 @@ using UnityEngine.Events;
 using System.IO;
 using System.Reflection;
 using System;
+using System.Threading.Tasks;
 
 public class ShowingAvailableDialog : MonoBehaviour
 {
-    
+
     private string username;
     public string NPCName;
     public string namagame;
@@ -34,6 +35,7 @@ public class ShowingAvailableDialog : MonoBehaviour
     public int condition;
     public UnityEvent Coba;
 
+
     //Intantiate Button Yang Akan Didelete
     private List<Button> specificInstantiatedButtons = new List<Button>();
 
@@ -42,24 +44,24 @@ public class ShowingAvailableDialog : MonoBehaviour
     void Start()
     {
         LoadFromJson();
-       if (FirebaseApp.DefaultInstance == null)
+        if (FirebaseApp.DefaultInstance == null)
+        {
+            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
             {
-                FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+                if (task.Exception != null)
                 {
-                    if (task.Exception != null)
-                    {
-                        Debug.LogError($"Firebase initialization failed: {task.Exception}");
-                    }
-                    else
-                    {
-                        InitializeFirestore();
-                    }
-                });
-            }
-            else
-            {
-                InitializeFirestore();
-            } 
+                    Debug.LogError($"Firebase initialization failed: {task.Exception}");
+                }
+                else
+                {
+                    InitializeFirestore();
+                }
+            });
+        }
+        else
+        {
+            InitializeFirestore();
+        }
     }
 
     private void InitializeFirestore()
@@ -68,51 +70,79 @@ public class ShowingAvailableDialog : MonoBehaviour
         db = FirebaseFirestore.DefaultInstance;
 
     }
+    // public void FillText()
+    // {
+    //     CollectionReference usersLogCollection = db.Collection("Userslog");
+
+    //     Query usersLogQuery = usersLogCollection
+    //         .WhereEqualTo("Username", username)
+    //         .WhereEqualTo("game", namagame);
+
+    //     QuerySnapshot querySnapshot = usersLogQuery.GetSnapshotAsync().Result;
+
+    //     foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+    //     {
+    //         if (documentSnapshot.Exists)
+    //         {
+    //             Debug.Log($"Username: {documentSnapshot.GetValue<string>("Username")}, game: {documentSnapshot.GetValue<string>("game")}, Quest: {string.Join(", ", documentSnapshot.GetValue<List<int>>("Quest"))}");
+    //         }
+    //     }
+    // }
 
     // Update is called once per frame
-    public void FillText()
-    {
+public void FillText()
+{
     Debug.Log(username);
-    DocumentReference docRef = db.Collection("UsersLog").Document(username);
-        
-        docRef.GetSnapshotAsync().ContinueWithOnMainThread(snapshotTask =>
+    CollectionReference docRef = db.Collection("UsersLog");
+    Query query = docRef.WhereEqualTo("Username", username).WhereEqualTo("game", namagame);
+
+    query.GetSnapshotAsync().ContinueWithOnMainThread(querySnapshotTask =>
+    {
+        if (querySnapshotTask.IsFaulted)
         {
-            if (snapshotTask.IsFaulted)
-            {
-                Debug.LogError("Error fetching document: " + snapshotTask.Exception);
-                return;
-            }
+            Debug.LogError("Error fetching documents: " + querySnapshotTask.Exception);
+            return;
+        }
 
-            DocumentSnapshot snapshot = snapshotTask.Result;
+        QuerySnapshot querySnapshot = querySnapshotTask.Result;
 
-            if (snapshot.Exists)
+        if (querySnapshot.Documents.Count() > 0)
+        {
+            foreach (DocumentSnapshot snapshot in querySnapshot.Documents)
             {
                 IDictionary<string, object> userData = snapshot.ToDictionary();
-                foreach (KeyValuePair<string, object> field in userData)
+
+                // Check if the "Quest" field exists
+                if (userData.TryGetValue("quest", out object questValue) && questValue is List<object> questList)
                 {
-                    if (field.Key.StartsWith("Quest") && field.Value is long questValue)
+                    // Iterate through the questList
+                    for (int i = 0; i < questList.Count; i++)
                     {
-                        string nameValue = field.Key;
-                        int Value = (int)questValue;
-                        Debug.Log("INI NAMA QUESTNYA" + nameValue);
-                        Debug.Log(Value);
-                        if(Value !=-1 && Value !=99)
+                        if (questList[i] is long questValueInt)
                         {
-                            AssignIntVariable(Value,nameValue);
+                            Debug.Log("Quest " + i + ": " + questValueInt);
+
+                            // Your logic for handling the quest value goes here
+                            if (questValueInt != -1 && questValueInt != 99)
+                            {
+                                AssignIntVariable((int)questValueInt, "Quest" + (i+1) );
+                            }
                         }
                     }
                 }
             }
-            else
-            {
-                Debug.Log("Document does not exist for username: " + username);
-            }
-        });
-    }
+        }
+        else
+        {
+            Debug.Log("No documents found for username: " + username);
+        }
+    });
+}
+
 
     public void LoadFromJson()
     {
-        string json = File.ReadAllText(Application.persistentDataPath+"/LogsPlayerDatas.json");
+        string json = File.ReadAllText(Application.persistentDataPath + "/LogsPlayerDatas.json");
         SaveUsersLogDatas data = JsonUtility.FromJson<SaveUsersLogDatas>(json);
 
         username = data.username;
@@ -121,7 +151,8 @@ public class ShowingAvailableDialog : MonoBehaviour
     public void AssignIntVariable(int Values, string NameValue)
     {
         string namaquest = NameValue;
-                // Define the collection reference
+        Debug.Log(namaquest);
+        // Define the collection reference
         CollectionReference dialogCollection = db.Collection("Quest");
 
         // Build the query
@@ -143,13 +174,13 @@ public class ShowingAvailableDialog : MonoBehaviour
                             Button instantiatedButton = Instantiate(buttonPrefab, parentTransform);
                             TextMeshProUGUI buttonText = instantiatedButton.GetComponentInChildren<TextMeshProUGUI>();
                             buttonText.text = dialogList[Values];
-                            instantiatedButton.onClick.AddListener(() => OnButtonClicked(instantiatedButton,namaquest,Values,0));
+                            instantiatedButton.onClick.AddListener(() => OnButtonClicked(instantiatedButton, namaquest, Values, 0));
                             // //IntantiatePrefabs Next Button Berdasarkan Quest Yang Dipilih.
                             // Button instantiatedButton2 = Instantiate(NextbuttonPrefab, NextparentTransform);
                             // TextMeshProUGUI buttonNextText = instantiatedButton2.GetComponentInChildren<TextMeshProUGUI>();
                             // buttonNextText.text = "Continue";
                             // instantiatedButton2.onClick.AddListener(() => NextButton(instantiatedButton2,namaquest,Values));
-                            
+
                         }
                     }
                 }
@@ -176,43 +207,43 @@ public class ShowingAvailableDialog : MonoBehaviour
         Query query = dialogCollection.WhereEqualTo("NPC", NPCName).WhereEqualTo("Quest", QuestName).WhereEqualTo("Condition", Condition).WhereEqualTo("game", namagame);
         query.GetSnapshotAsync().ContinueWithOnMainThread(queryTask =>
             {
-if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
-{
-    Debug.Log(NPCName);
-    Debug.Log(QuestName);
-    Debug.Log(Condition);
-    QuerySnapshot querySnapshot = queryTask.Result;
+                if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
+                {
+                    Debug.Log(NPCName);
+                    Debug.Log(QuestName);
+                    Debug.Log(Condition);
+                    QuerySnapshot querySnapshot = queryTask.Result;
 
-    DocumentSnapshot documentSnapshot = querySnapshot.Documents.FirstOrDefault();
+                    DocumentSnapshot documentSnapshot = querySnapshot.Documents.FirstOrDefault();
 
-    if (documentSnapshot.Exists)
-    {
-        Debug.Log("I WAS HERE");
-        string npcName = documentSnapshot.GetValue<string>("NPC");
-        List<string> dialogList = documentSnapshot.GetValue<List<string>>("Massage");
-        Debug.Log(dialogList[0]);
+                    if (documentSnapshot.Exists)
+                    {
+                        Debug.Log("I WAS HERE");
+                        string npcName = documentSnapshot.GetValue<string>("NPC");
+                        List<string> dialogList = documentSnapshot.GetValue<List<string>>("Massage");
+                        Debug.Log(dialogList[0]);
 
-        if (dialogList != null && dialogList.Count > 0 && index < dialogList.Count)
-        {
-            DeleteSpecificInstantiatedButtons();
-            ShowDialog(npcName, dialogList[index]);
-            Button instantiatedButton = Instantiate(buttonPrefab, NextparentTransform);
-            TextMeshProUGUI buttonText = instantiatedButton.GetComponentInChildren<TextMeshProUGUI>();
-            // Add the button to the list
-            specificInstantiatedButtons.Add(instantiatedButton);
-            buttonText.text = "Continue";
-            instantiatedButton.onClick.AddListener(() => OnButtonContinueClicked(instantiatedButton,QuestName,Condition,index));
-        }
-        else
-        {
-            CloseDialog();
-        }
-    }
-    else
-    {
-        // Handle the case when no documents are found or documentSnapshot is null
-    }
-}
+                        if (dialogList != null && dialogList.Count > 0 && index < dialogList.Count)
+                        {
+                            DeleteSpecificInstantiatedButtons();
+                            ShowDialog(npcName, dialogList[index]);
+                            Button instantiatedButton = Instantiate(buttonPrefab, NextparentTransform);
+                            TextMeshProUGUI buttonText = instantiatedButton.GetComponentInChildren<TextMeshProUGUI>();
+                            // Add the button to the list
+                            specificInstantiatedButtons.Add(instantiatedButton);
+                            buttonText.text = "Continue";
+                            instantiatedButton.onClick.AddListener(() => OnButtonContinueClicked(instantiatedButton, QuestName, Condition, index));
+                        }
+                        else
+                        {
+                            CloseDialog();
+                        }
+                    }
+                    else
+                    {
+                        // Handle the case when no documents are found or documentSnapshot is null
+                    }
+                }
             });
     }
 
@@ -223,42 +254,42 @@ if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
         Query query = dialogCollection.WhereEqualTo("NPC", NPCName).WhereEqualTo("Quest", QuestName).WhereEqualTo("Condition", Condition).WhereEqualTo("game", namagame);
         query.GetSnapshotAsync().ContinueWithOnMainThread(queryTask =>
             {
-if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
-{
-    QuerySnapshot querySnapshot = queryTask.Result;
+                if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
+                {
+                    QuerySnapshot querySnapshot = queryTask.Result;
 
-    DocumentSnapshot documentSnapshot = querySnapshot.Documents.FirstOrDefault();
+                    DocumentSnapshot documentSnapshot = querySnapshot.Documents.FirstOrDefault();
 
-    if (documentSnapshot.Exists)
-    {
-        Debug.Log("I WAS HERE");
-        string npcName = documentSnapshot.GetValue<string>("NPC");
-        List<string> dialogList = documentSnapshot.GetValue<List<string>>("Massage");
+                    if (documentSnapshot.Exists)
+                    {
+                        Debug.Log("I WAS HERE");
+                        string npcName = documentSnapshot.GetValue<string>("NPC");
+                        List<string> dialogList = documentSnapshot.GetValue<List<string>>("Massage");
 
-        if (dialogList != null && dialogList.Count > 0 && index < dialogList.Count)
-        {
-        NamaNPC.text = npcName;
-        dialogText.text = dialogList[index];
+                        if (dialogList != null && dialogList.Count > 0 && index < dialogList.Count)
+                        {
+                            NamaNPC.text = npcName;
+                            dialogText.text = dialogList[index];
 
-        // Increment the index for the next dialog
-        index++;
+                            // Increment the index for the next dialog
+                            index++;
 
-        // Create a local variable to capture the current index value
-        int currentIndex = index;
-        
-        clickedButton.onClick.RemoveAllListeners();
-        clickedButton.onClick.AddListener(() => OnButtonContinueClicked(clickedButton, QuestName, Condition, currentIndex));
-        }
-        else
-        {
-            CloseDialog();
-        }
-    }
-    else
-    {
-        // Handle the case when no documents are found or documentSnapshot is null
-    }
-}
+                            // Create a local variable to capture the current index value
+                            int currentIndex = index;
+
+                            clickedButton.onClick.RemoveAllListeners();
+                            clickedButton.onClick.AddListener(() => OnButtonContinueClicked(clickedButton, QuestName, Condition, currentIndex));
+                        }
+                        else
+                        {
+                            CloseDialog();
+                        }
+                    }
+                    else
+                    {
+                        // Handle the case when no documents are found or documentSnapshot is null
+                    }
+                }
             });
     }
 
@@ -280,15 +311,15 @@ if (queryTask.IsCompleted && !queryTask.IsFaulted && !queryTask.IsCanceled)
     }
 
     public void DeleteSpecificInstantiatedButtons()
-{
-    foreach (Button button in specificInstantiatedButtons)
     {
-        Destroy(button.gameObject);
-    }
+        foreach (Button button in specificInstantiatedButtons)
+        {
+            Destroy(button.gameObject);
+        }
 
-    // Clear the list to remove references to the destroyed buttons
-    specificInstantiatedButtons.Clear();
-}
+        // Clear the list to remove references to the destroyed buttons
+        specificInstantiatedButtons.Clear();
+    }
 
 
 }

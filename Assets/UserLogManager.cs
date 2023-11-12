@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System.IO;
 
+
 public class UserLogManager : MonoBehaviour
 {
     public SaveUsersLogData data = new SaveUsersLogData();
@@ -18,6 +19,7 @@ public class UserLogManager : MonoBehaviour
     public TMP_InputField EnteredUsername;
     public TMP_InputField EnteredPassword;
     public TMP_Text StatusText;
+    public string namagame;
     private FirebaseFirestore db;
     public string sceneName;
     public bool Logedin = false;
@@ -82,7 +84,7 @@ public class UserLogManager : MonoBehaviour
         string Password = EnteredPassword.text;
 
         CollectionReference npcDocRef = db.Collection("Users");
-        Query query = npcDocRef.WhereEqualTo("Username", Username).WhereEqualTo("Password", Password);
+        Query query = npcDocRef.WhereEqualTo("username", Username).WhereEqualTo("password", Password);
 
         query.GetSnapshotAsync().ContinueWithOnMainThread(task =>
            {
@@ -117,37 +119,51 @@ public class UserLogManager : MonoBehaviour
     }
 
     public void LoadScene()
-    {
-        
-        string username = EnteredUsername.text;
-        Debug.Log(username);
-        DocumentReference docRef = db.Collection("UsersLog").Document(username);
-        docRef.GetSnapshotAsync().ContinueWith(task =>
-        {
-    if (task.Result.Exists)
-    {
-        Debug.Log("Document already exists for username: " + username);
-        SaveToJson();
-    }
-    else
-    {
-        Dictionary<string, object> userData = new Dictionary<string, object>
-        {
-            {"Quest1", 0},
-            {"Quest2", -1},
-            {"Quest3", -1},
-            {"Quest4", -1},
-            {"Quest5", -1},
-            {"Username", username}
-        };
+{
+    string username = EnteredUsername.text;
+    Debug.Log(username);
+    
+    CollectionReference collectionRef = db.Collection("UsersLog");
+    Query query = collectionRef.WhereEqualTo("Username", username).WhereEqualTo("game", namagame);
 
-        docRef.SetAsync(userData);
-        SaveToJson();
+    query.GetSnapshotAsync().ContinueWith(task =>
+    {
+        if (task.Result.Documents.Count() > 0)
+        {
+            Debug.Log("Document already exists for username: " + username);
+            SaveToJson();
+        }
+        else
+        {
+            // Create a new document with the specified data
+            DocumentReference newDocRef = collectionRef.Document();
             
-    }});
+            Dictionary<string, object> userData = new Dictionary<string, object>
+            {
+                {"quest", new int[] {0, -1, -1, -1, -1}},
+                {"Username", username},
+                {"game", namagame}
+            };
+
+            // Set the data for the new document
+            newDocRef.SetAsync(userData).ContinueWithOnMainThread(addTask =>
+            {
+                if (addTask.IsCompleted)
+                {
+                    Debug.Log("Document created successfully for username: " + username);
+                    SaveToJson();
+                }
+                else
+                {
+                    Debug.LogError("Error creating document: " + addTask.Exception);
+                }
+            });
+        }
+    });
 
     test.Invoke();
-    }
+}
+
         // Dictionary<string, object> quest1Data = new Dictionary<string, object>
         // {
         //     {"Condition", 0}
